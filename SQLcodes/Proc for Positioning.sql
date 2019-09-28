@@ -10,11 +10,12 @@ BEGIN
     DECLARE event_list CURSOR for SELECT @sDate := @sDate +1 Start_Date,event_name,username,start_date,end_date FROM event_ledger,(SELECT @sDate := 0) m ORDER BY start_date ASC;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished = 1;
     OPEN event_list;
-    CREATE TEMPORARY TABLE returnqs(position INT,e_name VARCHAR(20),start_date DATE,end_date DATE);
+    DROP TABLE IF EXISTS returnqs CASCADE;
+    CREATE TEMPORARY TABLE returnqs(position INT,e_name VARCHAR(20),user varchar(20), start_date DATE,end_date DATE );
     SET flag = 0;
     addFirstFive: LOOP
         FETCH event_list INTO pos,name,user,std,etd;
-        INSERT INTO returnqs VALUES(pos,name,std,etd);
+        INSERT INTO returnqs VALUES(pos,name,user,std,etd);
         IF finished = 1 THEN
             LEAVE addFirstFive;
         END IF;
@@ -32,7 +33,7 @@ BEGIN
                 LEAVE findfirstocc;
             END IF;
             IF user = uname THEN
-                INSERT INTO returnqs VALUES(pos,name,std,etd);
+                INSERT INTO returnqs VALUES(pos,name,user,std,etd);
             END IF;
         END LOOP findfirstocc;
     END IF; 
